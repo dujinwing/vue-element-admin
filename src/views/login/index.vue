@@ -87,6 +87,23 @@ import { validUsername } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
 import axios from 'axios'
 
+// axios拦截器
+axios.interceptors.request.use(function(config) {
+  let token = ''
+  const accessToken = window.localStorage.getItem('accessToken')
+  if (accessToken) {
+    token = accessToken
+  }
+  config.headers.common['authorization'] = token
+
+  return config
+}, function(error) {
+  // Do something with request error
+  console.info('error: ')
+  console.info(error)
+  return Promise.reject(error)
+})
+
 export default {
   name: 'Login',
   components: { SocialSign },
@@ -182,9 +199,25 @@ export default {
     },
     login() {
       axios
-        .get('http://localhost:8863/consumeByFeign?name=abc')
+        .post('http://127.0.0.1:8080/login')
         .then(response => {
+          // 存儲token
+          window.localStorage.setItem('accessToken', response.data)
           console.log(response)
+          this.testRequest()
+        })
+        .catch(function(error) { // 请求失败处理
+          console.log(error)
+        })
+    },
+    testRequest() {
+      axios
+        .get('http://127.0.0.1:8080/api-a/hello?name=test&token=123')
+        .then(response => {
+          // 存儲token
+          window.localStorage.setItem('accessToken', response.data)
+          console.log(response)
+          this.testRequest()
         })
         .catch(function(error) { // 请求失败处理
           console.log(error)
