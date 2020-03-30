@@ -55,6 +55,9 @@
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="login">
         Login
       </el-button>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="testRequest">
+        test
+      </el-button>
 
       <div style="position:relative">
         <div class="tips">
@@ -125,7 +128,7 @@ export default {
     return {
       loginForm: {
         username: 'admin',
-        password: '111111'
+        password: '123456'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -199,12 +202,22 @@ export default {
     },
     login() {
       axios
-        .post('http://127.0.0.1:8080/login')
+        .post('http://127.0.0.1:8080/login', this.loginForm)
         .then(response => {
-          // 存儲token
-          window.localStorage.setItem('accessToken', response.data)
-          console.log(response)
-          this.testRequest()
+          // 存储token
+          if (response.data) {
+            window.localStorage.setItem('accessToken', response.data)
+            this.testRequest()
+            this.loading = true
+            this.$store.dispatch('user/login', this.loginForm)
+              .then(() => {
+                this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
+                this.loading = false
+              })
+              .catch(() => {
+                this.loading = false
+              })
+          }
         })
         .catch(function(error) { // 请求失败处理
           console.log(error)
@@ -214,10 +227,8 @@ export default {
       axios
         .get('http://127.0.0.1:8080/api-a/hello?name=test&token=123')
         .then(response => {
-          // 存儲token
-          window.localStorage.setItem('accessToken', response.data)
-          console.log(response)
-          this.testRequest()
+          // 存储token
+          console.log(response.data)
         })
         .catch(function(error) { // 请求失败处理
           console.log(error)

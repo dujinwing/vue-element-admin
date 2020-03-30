@@ -76,6 +76,7 @@ export default {
     },
     async logout() {
       await this.$store.dispatch('user/logout')
+      window.localStorage.removeItem('accessToken')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
     }
   }

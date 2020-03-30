@@ -69,6 +69,19 @@ export const constantRoutes = [
         meta: { title: 'Guide', icon: 'guide', noCache: true }
       }
     ]
+  },
+  {
+    path: '/test',
+    component: 'layout/Layout',
+    redirect: '/test/index',
+    children: [
+      {
+        path: 'index',
+        component: 'views/test/index',
+        name: '测试页面',
+        meta: { title: '测试页面', icon: 'guide', noCache: true }
+      }
+    ]
   }
 ]
 
