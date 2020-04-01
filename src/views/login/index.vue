@@ -52,10 +52,20 @@
         </el-form-item>
       </el-tooltip>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="login">
+      <el-button
+        :loading="loading"
+        type="primary"
+        style="width:100%;margin-bottom:30px;"
+        @click.native.prevent="loginNow"
+      >
         Login
       </el-button>
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="testRequest">
+      <el-button
+        :loading="loading"
+        type="primary"
+        style="width:100%;margin-bottom:30px;"
+        @click.native.prevent="testRequest"
+      >
         test
       </el-button>
 
@@ -89,23 +99,6 @@
 import { validUsername } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
 import axios from 'axios'
-
-// axios拦截器
-axios.interceptors.request.use(function(config) {
-  let token = ''
-  const accessToken = window.localStorage.getItem('accessToken')
-  if (accessToken) {
-    token = accessToken
-  }
-  config.headers.common['authorization'] = token
-
-  return config
-}, function(error) {
-  // Do something with request error
-  console.info('error: ')
-  console.info(error)
-  return Promise.reject(error)
-})
 
 export default {
   name: 'Login',
@@ -200,14 +193,13 @@ export default {
         }
       })
     },
-    login() {
+    loginNow() {
       axios
         .post('http://127.0.0.1:8080/login', this.loginForm)
         .then(response => {
           // 存储token
-          if (response.data) {
-            window.localStorage.setItem('accessToken', response.data)
-            this.testRequest()
+          if (response.data.accessToken) {
+            window.localStorage.setItem('accessToken', response.data.accessToken)
             this.loading = true
             this.$store.dispatch('user/login', this.loginForm)
               .then(() => {
@@ -217,6 +209,8 @@ export default {
               .catch(() => {
                 this.loading = false
               })
+          } else {
+            this.$message.error('认证失败：' + response.data)
           }
         })
         .catch(function(error) { // 请求失败处理
@@ -225,7 +219,7 @@ export default {
     },
     testRequest() {
       axios
-        .get('http://127.0.0.1:8080/api-a/hello?name=test&token=123')
+        .get('http://127.0.0.1:8080/api-b/hello?name=test&token=123')
         .then(response => {
           // 存储token
           console.log(response.data)

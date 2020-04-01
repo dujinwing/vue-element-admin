@@ -12,6 +12,7 @@ import '@/styles/index.scss' // global css
 import App from './App'
 import store from './store'
 import router from './router'
+import axios from 'axios'
 
 import './icons' // icon
 import './permission' // permission control
@@ -27,6 +28,26 @@ import * as filters from './filters' // global filters
  * Currently MockJs will be used in the production environment,
  * please remove it before going online ! ! !
  */
+
+// axios拦截器
+axios.interceptors.request.use(function(config) {
+  console.log(config)
+  alert('interceptor in ')
+  let token = ''
+  const accessToken = window.localStorage.getItem('accessToken')
+
+  if (config.url.lastIndexOf('login') === -1) {
+    if (accessToken) {
+      token = accessToken
+      config.headers.common['authorization'] = token
+    } else {
+      Vue.prototype.$message.error('登录过期，请重新登录')
+      throw new Error('登录过期')
+    }
+  }
+  return config
+})
+
 if (process.env.NODE_ENV === 'production') {
   const { mockXHR } = require('../mock')
   mockXHR()
